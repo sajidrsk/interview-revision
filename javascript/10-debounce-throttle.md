@@ -1,6 +1,8 @@
 # JavaScript Interview Prep: Debouncing & Throttling (Exhaustive Guide)
 
-Debouncing and Throttling are two essential techniques used to optimize event handling performance by limiting the rate at which a function is executed.
+**Source:** [RoadsideCoder - Debouncing and Throttling](https://www.youtube.com/watch?v=kCfTEoeQvQw)
+
+Debouncing and Throttling are two essential techniques used to optimize event handling performance by limiting the rate at which a function is executed. Libraries like Lodash (`_.debounce` and `_.throttle`) are commonly used for this, but building your own polyfills is a classic interview question.
 
 ---
 
@@ -17,7 +19,7 @@ Debouncing ensures that a function is only executed after a certain period of "s
 
 Throttling ensures that a function is executed at most once every specified time interval, regardless of how many times the event is triggered.
 
-- **Real-World Example:** Twitter infinite scroll. As you scroll, the scroll event fires hundreds of times. Throttling limits the API call for new posts to fire only once every 500ms.
+- **Real-World Example:** Twitter infinite scroll. As you scroll, the scroll event fires hundreds of times. Throttling limits the API call for new posts to fire only once every 500ms or 800ms.
 - **Core Goal:** To maintain consistent function execution during a continuous stream of events.
 
 ---
@@ -36,44 +38,39 @@ Throttling ensures that a function is executed at most once every specified time
 
 ### **Polyfill for Debounce**
 
-This version includes the logic to handle arguments and context (this).
+This version uses `setTimeout` to delay the execution. If the function is called again before the delay finishes, we clear the previous timeout and start over.
 
 ```javascript
-function myDebounce(cb, delay) {
+const myDebounce = (cb, d) => {
   let timer;
 
   return function (...args) {
-    const ctx = this;
     if (timer) clearTimeout(timer); // Reset timer if called again before delay finishes
 
     timer = setTimeout(() => {
-      cb.apply(ctx, args);
-    }, delay);
+      cb(...args);
+    }, d);
   };
-}
+};
 ```
-*Note:* Preserving `this` matters when the debounced function is used as a method (e.g. `obj.method()`).
+*Note:* In an object-oriented context, you'd also capture and apply `this` context using `cb.apply(this, args)`.
 
 ### **Polyfill for Throttle**
 
-Leading-edge throttle: first call runs immediately, then a **cooldown** flag ignores further calls until `delay` ms have passed. (Another common variant tracks `last` time with `Date.now()` for trailing-edge behavior.)
+The timestamp-based approach (as shown in the video). By keeping track of the `last` time the function was executed, we can immediately return if the time passed since then is less than our delay (`d`).
 
 ```javascript
-function myThrottle(cb, delay) {
-  let wait = false;
+const myThrottle = (cb, d) => {
+  let last = 0;
 
   return function (...args) {
-    const ctx = this;
-    if (wait) return;
-
-    cb.apply(ctx, args);
-    wait = true;
-
-    setTimeout(() => {
-      wait = false;
-    }, delay);
+    let now = new Date().getTime();
+    if (now - last < d) return; // Ignore event if cooldown hasn't finished
+    
+    last = now;
+    return cb(...args);
   };
-}
+};
 ```
 
 ---
@@ -98,10 +95,10 @@ function myThrottle(cb, delay) {
 **Question:** Why do we need `clearTimeout(timer)`?
 **Answer:** Without it, every single keystroke would eventually trigger its own API call after the delay. `clearTimeout` cancels the previous scheduled call so only the _very last_ one survives.
 
-### **Arguments and Context**
+### **Arguments**
 
 **Question:** Why do we return an anonymous function inside the polyfill?
-**Answer:** To maintain the original function's closure, arguments, and scope, ensuring that the debounced/throttled function behaves exactly like the original.
+**Answer:** To maintain the original function's closure and accept dynamic arguments (`...args`) ensuring that the debounced/throttled function behaves exactly like the original when attached to an event listener.
 
 ---
 
@@ -110,4 +107,4 @@ function myThrottle(cb, delay) {
 - **Debounce:** "Wait until I'm done." (Search)
 - **Throttle:** "Only once every X ms." (Scroll)
 - **Debounce Implementation:** Uses `setTimeout` + `clearTimeout`.
-- **Throttle Implementation:** Often a “cooldown” flag with `setTimeout`, or a `last`-time / timestamp check so the handler runs at most once per interval.
+- **Throttle Implementation:** Compares `new Date().getTime()` with the `last` tracked execution time.

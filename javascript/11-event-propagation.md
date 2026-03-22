@@ -1,5 +1,7 @@
 # JavaScript Interview Prep: Event Propagation (Exhaustive Guide)
 
+**Source:** [RoadsideCoder - Event Propagation](https://www.youtube.com/watch?v=rS_4YfbEo2U)
+
 Event propagation determines the order in which event handlers are executed when one element is nested inside another and both have handlers for the same event.
 
 ---
@@ -56,7 +58,16 @@ The most high-value interview topic. Instead of adding an event listener to 100 
 ### **Implementation Strategy:**
 1. Attach listener to the parent container.
 2. Use `event.target` to identify which child was clicked.
-3. Check the `tagName` or `className` to trigger specific logic.
+3. Check the `tagName` or use `event.target.closest()` to handle clicks on nested elements (e.g., clicking a bold tag inside the target span).
+
+```javascript
+document.querySelector(".products").addEventListener("click", (e) => {
+  // Use closest to ensure we handle clicks on children of the target element
+  if (e.target.closest("span")) {
+    window.location.href = "/" + e.target.className;
+  }
+});
+```
 
 **Benefits:**
 * Lower memory usage.
@@ -64,13 +75,22 @@ The most high-value interview topic. Instead of adding an event listener to 100 
 
 ---
 
-## 7. Senior Level Challenge: Modal Closing
+## 7. Output-Based Question: Mixed Propagation
+**Question:** If we have a nested `div > form > button`, and we add normal event listeners (bubbling) to `div` and `button`, but we add a capturing event listener (`{ capture: true }`) to the `form`, what is the order of execution when the button is clicked?
+
+**Answer:** `form` → `button` → `div`
+**Logic:** Event capturing phase runs first from top to bottom. The `form` has a capturing listener, so it executes first. Then the event reaches the target (`button`) and bubbles up, executing the `button` listener, followed by the `div` listener.
+
+---
+
+## 8. Senior Level Challenge: Modal Closing
 **Requirement:** Create a modal that closes when you click the "negative space" (the background) but stays open if you click inside the modal content.
 
 ### **The Solution logic:**
 Do not just add a close listener to the container, because bubbling will cause a click *inside* the modal to trigger the container's close event.
 ```javascript
 modalContainer.addEventListener("click", (e) => {
+  // Only trigger if we clicked exactly on the outer container background
   if (e.target.className === "modal-container") {
     closeModal();
   }
@@ -85,5 +105,4 @@ modalContainer.addEventListener("click", (e) => {
 - [ ] **Capturing:** Parent to Child (Set `capture: true`).
 - [ ] **Delegation:** Listener on parent + `e.target` check.
 - [ ] **e.stopPropagation():** Stops the event from reaching other elements (bubbling/capturing).
-- [ ] **e.stopImmediatePropagation():** Like above, and skips other listeners on the same target.
 - [ ] **e.preventDefault():** Stops default browser behavior (like form submission or link following).

@@ -7,6 +7,13 @@ Objects are the building blocks of JavaScript. This guide covers every property 
 ## 1. Object Basics & Deletion
 * **Definition:** An object is a collection of key-value pairs.
 * **Access:** Dot notation (`obj.key`) or Square brackets (`obj["key"]`).
+* **Properties with Spaces:** To add or access a property with spaces, you must use string keys and square brackets:
+  ```javascript
+  const user = {};
+  user["like this video"] = true;
+  console.log(user["like this video"]); // true
+  delete user["like this video"];
+  ```
 
 ### **The delete Keyword Gotcha**
 **Question:** What is the output of the following IIFE?
@@ -82,13 +89,19 @@ a[c] = 456;
 
 console.log(a[b]); // Output: 456
 ```
-**Logic:** JavaScript cannot use an object as a key directly. It converts the object to a string. Both `b` and `c` stringify to `"[object Object]" `. Therefore, `a["[object Object]"]` is first set to 123 and then overwritten by 456.
+**Logic:** JavaScript cannot use an object as a key directly. It converts the object to a string. Both `b` and `c` stringify to `"[object Object]"`. Therefore, `a["[object Object]"]` is first set to 123 and then overwritten by 456.
 
 ---
 
 ## 7. JSON Methods (Stringify & Parse)
-* **stringify:** Converts object to string (e.g., for LocalStorage).
+* **stringify:** Converts object to string. Commonly used when storing data in `localStorage`.
 * **parse:** Converts string back to object.
+
+### **Local Storage Use Case**
+```javascript
+localStorage.setItem("test", JSON.stringify(user));
+const storedUser = JSON.parse(localStorage.getItem("test"));
+```
 
 ### **Advanced Stringify Filter**
 **Question:** How can you stringify only specific properties?
@@ -125,13 +138,62 @@ console.log(shape.perimeter()); // NaN
 * **Spread:** `const combined = { ...obj1, ...obj2 };`
 * **Rest Parameter:** Must be the **last** argument in a function.
 
+### **Spread with Strings**
+**Question:** What is the output?
+```javascript
+console.log([..."Lydia"]); // ["L", "y", "d", "i", "a"]
+```
+**Logic:** The spread operator spreads the iterable characters of the string into the array.
+
+### **Spread Overwriting Properties**
+**Question:** What is the output?
+```javascript
+const user = { name: "Lydia", age: 21 };
+const admin = { admin: true, ...user };
+console.log(admin); // { admin: true, name: "Lydia", age: 21 }
+```
+
+### **Rest Parameter Gotcha**
+```javascript
+// SyntaxError: Rest parameter must be last formal parameter
+function getItems(fruitList, ...args, favoriteFruit) {
+  return [...fruitList, ...args, favoriteFruit];
+}
+```
+
 ---
 
 ## 11. Object Referencing & Equality
 * **Assignment:** `let d = c;` sharing the same memory address. Changing `d` changes `c`.
 * **Equality:** `console.log({a:1} == {a:1})` is `false` because they point to different memory locations.
 
-### **Reference Reassignment**
+### **Reassigning Object Variables**
+**Question:** What is the output?
+```javascript
+let person = { name: "Lydia" };
+const members = [person];
+person = null;
+
+console.log(members); // [{ name: "Lydia" }]
+```
+**Logic:** We assigned the object to `members[0]`. Reassigning `person` to `null` only changes the `person` variable's reference, not the actual object in memory that `members[0]` is still pointing to. If we did `person.name = null`, it would affect the array.
+
+### **Reference vs Clone in Default Parameters**
+**Question:** What is the output?
+```javascript
+const value = { number: 10 };
+
+const multiply = (x = { ...value }) => {
+  console.log(x.number *= 2);
+};
+
+multiply(); // 20 (Uses default parameter, which is a clone)
+multiply(); // 20 (Clones again)
+multiply(value); // 20 (Passes actual reference, modifies value.number)
+multiply(value); // 40 (value.number is now 20, 20 * 2 = 40)
+```
+
+### **Reference Reassignment inside Functions**
 **Question:** Does changing an object inside a function affect the original?
 ```javascript
 function changeAge(person) {
