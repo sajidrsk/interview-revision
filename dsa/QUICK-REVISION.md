@@ -194,7 +194,7 @@ return prev;
 ### 19 — Linked List Cycle
 **Ask:** Has cycle?  
 **Pick:** Floyd: slow +1, fast +2; meet → cycle.  
-**Follow-up LCA of cycle:** after meet, one pointer to head, both +1 until meet = start.  
+**Follow-up — cycle start:** after meet, reset one pointer to head; move both +1 until they meet again (= start of cycle).  
 **O(n) / O(1)** · `while (fast && fast.next)`.
 
 ---
