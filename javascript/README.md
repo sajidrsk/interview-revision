@@ -17,3 +17,9 @@ Work through these in order for a typical JS fundamentals path, or jump by topic
 | 11  | [Event propagation & delegation](11-event-propagation.md)                                            |
 
 Numbers match filenames; gaps (09, 10) are free for future notes if you add them.
+
+---
+
+## DSA (coding rounds)
+
+Frontend-scoped LeetCode patterns: [../dsa/README.md](../dsa/README.md) — hash maps, two pointers, trees, BFS/DFS (~32 problems).
